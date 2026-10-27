@@ -3,7 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { Animated, Easing, Keyboard, LayoutAnimation, ScrollView, StyleSheet, Text, UIManager, View } from 'react-native';
+import { Animated, Easing, Keyboard, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Sidebar, { SIDEBAR_WIDTH } from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
 import Composer from './components/Composer';
@@ -15,10 +15,6 @@ import TabBar from './components/TabBar';
 // running. (If JS never runs at all — e.g. a missing bundle — no JS-side
 // call can help; the build workflow now fails loudly instead of shipping
 // a bundle-less APK.)
-// LayoutAnimation on Android needs the experimental flag; without it the
-// keyboard-driven layout shift below would jump instead of animating.
-UIManager.setLayoutAnimationEnabledExperimental?.(true);
-
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function App() {
@@ -27,36 +23,29 @@ export default function App() {
   const splashHidden = useRef(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
 
-  // Keyboard mimic (Muse behavior): the composer moves up with the keyboard,
-  // the TabBar stays at the screen bottom behind the keyboard.
-  // windowSoftInputMode=adjustNothing (app.json) means the window never
-  // resizes/pans, so this JS state is the only thing that moves the composer.
-  // Content padding is max(tabBarHeight, keyboardHeight): TabBar height when
-  // the keyboard is closed (composer above TabBar), keyboard height when open
-  // (composer directly above the keyboard, TabBar behind it, no gap).
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [tabBarHeight, setTabBarHeight] = useState(0);
+  // Keyboard mimic (Muse behavior): composer moves up with the keyboard,
+  // TabBar is not visible while the keyboard is open, back when it closes.
+  // Proven cause (ReactRootView.java): RN keyboard events fire ONLY on
+  // global layout. With adjustNothing the window never resizes, so ime
+  // growth (toolbar) never triggers a layout, height updates never fire,
+  // and JS padding stays short (composer peeking). Fix: adjustResize
+  // (app.json) lets the window itself shrink to the real ime height, so
+  // the composer sits fully above the keyboard with no JS height math.
+  // JS only tracks visible/hidden (boolean, reliable under adjustResize
+  // because window resize always triggers layout) to hide the TabBar
+  // while the keyboard is open, matching Muse's covered TabBar visually.
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    const showSub = Keyboard.addListener('keyboardDidShow', (e) => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setKeyboardHeight(e.endCoordinates.height);
+    const showSub = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
     });
     const hideSub = Keyboard.addListener('keyboardDidHide', () => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setKeyboardHeight(0);
-    });
-    // DidChangeFrame tracks height changes after first show: toolbar or
-    // suggestions can grow the keyboard after DidShow, which left the
-    // composer peeking instead of fully above the keyboard.
-    const changeSub = Keyboard.addListener('keyboardDidChangeFrame', (e) => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setKeyboardHeight(e.endCoordinates.height);
+      setKeyboardVisible(false);
     });
     return () => {
       showSub.remove();
       hideSub.remove();
-      changeSub.remove();
     };
   }, []);
 
@@ -119,18 +108,16 @@ export default function App() {
       <StatusBar style="light" />
       <Sidebar />
       <Animated.View style={[styles.main, { transform: [{ translateX }] }]}>
-        <View style={[styles.content, { paddingBottom: Math.max(tabBarHeight, keyboardHeight) }]}>
-          <ChatHeader onMenuPress={() => setSidebarOpen((v) => !v)} />
-          <ScrollView style={styles.messages} contentContainerStyle={styles.messagesContent}>
-            {messages.map((m) => (
-              <View key={m.id} style={styles.bubble}>
-                <Text style={styles.bubbleText}>{m.text}</Text>
-              </View>
-            ))}
-          </ScrollView>
-          <Composer onSend={handleSend} />
-        </View>
-        <TabBar onTabBarHeight={setTabBarHeight} />
+        <ChatHeader onMenuPress={() => setSidebarOpen((v) => !v)} />
+        <ScrollView style={styles.messages} contentContainerStyle={styles.messagesContent}>
+          {messages.map((m) => (
+            <View key={m.id} style={styles.bubble}>
+              <Text style={styles.bubbleText}>{m.text}</Text>
+            </View>
+          ))}
+        </ScrollView>
+        <Composer onSend={handleSend} />
+        {!isKeyboardVisible && <TabBar />}
       </Animated.View>
     </View>
     </SafeAreaProvider>
@@ -140,7 +127,6 @@ export default function App() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#000' },
   main: { flex: 1, backgroundColor: '#000', zIndex: 1 },
-  content: { flex: 1 },
   messages: { flex: 1 },
   messagesContent: { padding: 16, paddingBottom: 8 },
   bubble: {

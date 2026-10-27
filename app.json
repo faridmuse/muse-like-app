@@ -7,7 +7,8 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.farid.muselike"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,14 +18,13 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "package": "com.farid.muselike",
-      "windowSoftInputMode": "adjustNothing"
+      "windowSoftInputMode": "adjustResize"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font",
-      "./plugins/with-adjust-nothing",
       [
         "expo-splash-screen",
         {
