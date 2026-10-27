@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, Easing, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 const SIDEBAR_WIDTH = Math.round(Dimensions.get('window').width * 0.78);
@@ -19,7 +19,7 @@ export default function Sidebar({ open }) {
     Animated.timing(widthAnim, {
       toValue: open ? 1 : 0,
       duration: 280,
-      easing: Animated.Easing.out(Animated.Easing.cubic),
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
     }).start();
   }, [open, widthAnim]);
