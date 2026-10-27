@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
+import { Feather } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { Animated, Easing, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Sidebar, { SIDEBAR_WIDTH } from './components/Sidebar';
@@ -42,6 +43,11 @@ export default function App() {
     'OptimisticApp': require('./assets/fonts/OptimisticApp-Regular.ttf'),
     'OptimisticApp-Medium': require('./assets/fonts/OptimisticApp-Medium.ttf'),
     'OptimisticApp-Bold': require('./assets/fonts/OptimisticApp-Bold.ttf'),
+    // Feather icons render blank in this standalone build unless preloaded:
+    // createIconSet only loads the font on mount, and that path evidently
+    // fails here even though Feather.ttf ships in the APK. Feather.font is
+    // the set's own map ({ feather: asset }), verified in v15.1.1 source.
+    ...Feather.font,
   });
 
   useEffect(() => {
