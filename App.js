@@ -3,7 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { Animated, Easing, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Keyboard, LayoutAnimation, ScrollView, StyleSheet, Text, UIManager, View } from 'react-native';
 import Sidebar, { SIDEBAR_WIDTH } from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
 import Composer from './components/Composer';
@@ -15,6 +15,10 @@ import TabBar from './components/TabBar';
 // running. (If JS never runs at all — e.g. a missing bundle — no JS-side
 // call can help; the build workflow now fails loudly instead of shipping
 // a bundle-less APK.)
+// LayoutAnimation on Android needs the experimental flag; without it the
+// keyboard-driven layout shift below would jump instead of animating.
+UIManager.setLayoutAnimationEnabledExperimental?.(true);
+
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function App() {
@@ -22,6 +26,31 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const splashHidden = useRef(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
+
+  // Keyboard mimic (Muse behavior): the composer moves up with the keyboard,
+  // the TabBar stays at the screen bottom behind the keyboard.
+  // windowSoftInputMode=adjustNothing (app.json) means the window never
+  // resizes/pans, so this JS state is the only thing that moves the composer.
+  // Content padding is max(tabBarHeight, keyboardHeight): TabBar height when
+  // the keyboard is closed (composer above TabBar), keyboard height when open
+  // (composer directly above the keyboard, TabBar behind it, no gap).
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [tabBarHeight, setTabBarHeight] = useState(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', (e) => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const hideSplash = useCallback(async () => {
     if (splashHidden.current) return;
@@ -82,16 +111,18 @@ export default function App() {
       <StatusBar style="light" />
       <Sidebar />
       <Animated.View style={[styles.main, { transform: [{ translateX }] }]}>
-        <ChatHeader onMenuPress={() => setSidebarOpen((v) => !v)} />
-        <ScrollView style={styles.messages} contentContainerStyle={styles.messagesContent}>
-          {messages.map((m) => (
-            <View key={m.id} style={styles.bubble}>
-              <Text style={styles.bubbleText}>{m.text}</Text>
-            </View>
-          ))}
-        </ScrollView>
-        <Composer onSend={handleSend} />
-        <TabBar />
+        <View style={[styles.content, { paddingBottom: Math.max(tabBarHeight, keyboardHeight) }]}>
+          <ChatHeader onMenuPress={() => setSidebarOpen((v) => !v)} />
+          <ScrollView style={styles.messages} contentContainerStyle={styles.messagesContent}>
+            {messages.map((m) => (
+              <View key={m.id} style={styles.bubble}>
+                <Text style={styles.bubbleText}>{m.text}</Text>
+              </View>
+            ))}
+          </ScrollView>
+          <Composer onSend={handleSend} />
+        </View>
+        <TabBar onTabBarHeight={setTabBarHeight} />
       </Animated.View>
     </View>
     </SafeAreaProvider>
@@ -101,6 +132,7 @@ export default function App() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#000' },
   main: { flex: 1, backgroundColor: '#000', zIndex: 1 },
+  content: { flex: 1 },
   messages: { flex: 1 },
   messagesContent: { padding: 16, paddingBottom: 8 },
   bubble: {

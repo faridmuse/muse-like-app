@@ -16,7 +16,8 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.farid.muselike"
+      "package": "com.farid.muselike",
+      "windowSoftInputMode": "adjustNothing"
     },
     "web": {
       "favicon": "./assets/favicon.png"
