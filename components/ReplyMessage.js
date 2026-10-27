@@ -3,8 +3,10 @@ import Icon from './Icon';
 import ChatBubble from './ChatBubble';
 
 // 6 — sent replying chat: "Anda membalas <author>" label, the quoted
-// bubble (truncated to 2 lines), then the reply bubble itself. The reply
-// bubble stays draggable, like any other bubble, via ChatBubble.
+// bubble (truncated to 2 lines), then the reply bubble itself. Matching
+// Muse: quoted text is greyed out (not white), and the reply bubble
+// overlaps the quoted bubble slightly. The reply bubble stays draggable,
+// like any other bubble, via ChatBubble.
 export default function ReplyMessage({ message, onReply }) {
   return (
     <View style={styles.wrap}>
@@ -26,6 +28,6 @@ const styles = StyleSheet.create({
   wrap: { marginBottom: 12 },
   labelRow: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 6 },
   label: { color: '#888', fontSize: 13, fontFamily: 'OptimisticApp', marginLeft: 6 },
-  quotedBubble: { alignSelf: 'flex-end', backgroundColor: '#262626', borderRadius: 18, paddingHorizontal: 12, paddingVertical: 10, maxWidth: '85%', marginBottom: 6 },
-  quotedText: { color: '#fff', fontSize: 16, fontFamily: 'OptimisticApp' },
+  quotedBubble: { alignSelf: 'flex-end', backgroundColor: '#262626', borderRadius: 18, paddingHorizontal: 12, paddingVertical: 10, maxWidth: '85%', marginBottom: -4 },
+  quotedText: { color: '#888', fontSize: 16, fontFamily: 'OptimisticApp' },
 });

@@ -1,16 +1,18 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Top fade over the chat area: dark at the very top, fading to clear.
-// Stepped strips, no gradient library needed. pointerEvents="none" so it
-// never blocks scrolling or taps on messages underneath.
-export default function TopFade({ height = 84 }) {
-  const strip = height / 7;
+// True native gradient, one view, GPU-rendered. pointerEvents="none" so
+// it never blocks scrolling or taps on messages underneath.
+export default function TopFade({ height = 28 }) {
   return (
-    <View style={[styles.fade, { height }]} pointerEvents="none">
-      {[1, 0.85, 0.7, 0.55, 0.4, 0.25, 0.1].map((o, i) => (
-        <View key={i} style={{ height: strip, backgroundColor: `rgba(0,0,0,${o})` }} />
-      ))}
-    </View>
+    <LinearGradient
+      colors={['rgba(0,0,0,1)', 'rgba(0,0,0,0)']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={[styles.fade, { height }]}
+      pointerEvents="none"
+    />
   );
 }
 

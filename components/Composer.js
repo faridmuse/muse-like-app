@@ -32,28 +32,30 @@ export default function Composer({ onSend, replyTo, onCancelReply }) {
           ))}
         </View>
       )}
-      <ComposerReplyPreview replyTo={replyTo} onCancel={onCancelReply} />
       <View style={styles.bar}>
-        <TouchableOpacity activeOpacity={0.7} style={styles.plusButton} onPress={() => setMenuOpen((v) => !v)}>
-          <Icon name="plus" size={24} color="#fff" />
-        </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          placeholder="Kirim pesan"
-          placeholderTextColor="#888"
-          value={text}
-          onChangeText={setText}
-          multiline
-        />
-        {hasText ? (
-          <TouchableOpacity activeOpacity={0.7} style={styles.sendButton} onPress={handleSend}>
-            <Icon name="arrow-up" size={22} color="#fff" />
+        <ComposerReplyPreview replyTo={replyTo} onCancel={onCancelReply} />
+        <View style={styles.inputRow}>
+          <TouchableOpacity activeOpacity={0.7} style={styles.plusButton} onPress={() => setMenuOpen((v) => !v)}>
+            <Icon name="plus" size={24} color="#fff" />
           </TouchableOpacity>
-        ) : (
-          <TouchableOpacity activeOpacity={0.7} style={styles.micButton}>
-            <Icon name="mic" size={20} color="#fff" />
-          </TouchableOpacity>
-        )}
+          <TextInput
+            style={styles.input}
+            placeholder="Kirim pesan"
+            placeholderTextColor="#888"
+            value={text}
+            onChangeText={setText}
+            multiline
+          />
+          {hasText ? (
+            <TouchableOpacity activeOpacity={0.7} style={styles.sendButton} onPress={handleSend}>
+              <Icon name="arrow-up" size={22} color="#fff" />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity activeOpacity={0.7} style={styles.micButton}>
+              <Icon name="mic" size={20} color="#fff" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -65,9 +67,10 @@ const styles = StyleSheet.create({
   menuRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 16 },
   menuIcon: { marginRight: 12 },
   menuLabel: { color: '#fff', fontSize: 16, fontFamily: 'OptimisticApp' },
-  bar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#262626', borderRadius: 28, paddingLeft: 6, paddingRight: 6, paddingVertical: 6 },
+  bar: { backgroundColor: '#262626', borderRadius: 28, paddingLeft: 6, paddingRight: 6, paddingVertical: 6 },
+  inputRow: { flexDirection: 'row', alignItems: 'center' },
   plusButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#3a3a3a', alignItems: 'center', justifyContent: 'center' },
   input: { flex: 1, color: '#fff', fontSize: 16, fontFamily: 'OptimisticApp', paddingHorizontal: 8, maxHeight: 120 },
   micButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#3a3a3a', alignItems: 'center', justifyContent: 'center' },
-  sendButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#007AFF', alignItems: 'center', justifyContent: 'center' },
+  sendButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#f02b9b', alignItems: 'center', justifyContent: 'center' },
 });

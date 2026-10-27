@@ -3,7 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { Animated, Easing, ScrollView, StyleSheet, View } from 'react-native';
+import { Animated, Easing, PanResponder, ScrollView, StyleSheet, View } from 'react-native';
 import { KeyboardProvider, useKeyboardHandler } from 'react-native-keyboard-controller';
 import Reanimated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import Sidebar, { SIDEBAR_WIDTH } from './components/Sidebar';
@@ -34,6 +34,36 @@ function Main() {
   const scrollRef = useRef(null);
   const splashHidden = useRef(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
+
+  // Sidebar swipe, same toggle as the hamburger button: when closed,
+  // a right swipe starting at the screen edge (startX < 16, left of
+  // the chat padding, so bubble drags starting at x >= 16 never
+  // trigger it) opens it; when open, a left swipe anywhere closes
+  // it. Threshold 60, same as drag-to-reply. No interactive follow:
+  // on release past threshold it toggles, and the existing 280 ms
+  // slide animation runs. Vertical drags and taps return false, so
+  // ScrollView, bubble drags, and buttons keep working.
+  const sidebarOpenRef = useRef(false);
+  useEffect(() => {
+    sidebarOpenRef.current = sidebarOpen;
+  }, [sidebarOpen]);
+
+  const sidebarPanResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gesture) => {
+        const startX = evt.nativeEvent.pageX - gesture.dx;
+        if (!sidebarOpenRef.current) {
+          return startX < 16 && gesture.dx > 12 && gesture.dx > Math.abs(gesture.dy) * 1.5;
+        }
+        return gesture.dx < -12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.5;
+      },
+      onPanResponderRelease: (evt, gesture) => {
+        if (!sidebarOpenRef.current && gesture.dx > 60) setSidebarOpen(true);
+        else if (sidebarOpenRef.current && gesture.dx < -60) setSidebarOpen(false);
+      },
+      onPanResponderTerminate: () => {},
+    }),
+  ).current;
 
   // Keyboard mimic (Muse behavior): composer moves up with the keyboard,
   // TabBar is covered by the keyboard while typing, back when it closes.
@@ -149,7 +179,7 @@ function Main() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.root} onLayout={hideSplash}>
+      <View style={styles.root} onLayout={hideSplash} {...sidebarPanResponder.panHandlers}>
       <StatusBar style="light" />
       <Sidebar />
       <Animated.View style={[styles.main, { transform: [{ translateX }] }]}>

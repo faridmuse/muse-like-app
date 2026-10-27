@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center' },
   avatar: { width: 68, height: 68, borderRadius: 34, backgroundColor: '#f9a8d4', alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: '#000', fontSize: 28, fontFamily: 'OptimisticApp-Bold' },
-  namePill: { backgroundColor: '#262626', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6, marginTop: -12, alignItems: 'center' },
+  namePill: { backgroundColor: '#262626', borderRadius: 24, paddingHorizontal: 12, paddingVertical: 6, marginTop: -12, alignItems: 'center' },
   name: { color: '#fff', fontSize: 14, fontFamily: 'OptimisticApp-Bold' },
   status: { color: '#888', fontSize: 12, fontFamily: 'OptimisticApp', marginTop: 2 },
 });
