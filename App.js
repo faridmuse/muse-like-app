@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Animated, Easing, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Sidebar, { SIDEBAR_WIDTH } from './components/Sidebar';
@@ -76,7 +77,8 @@ export default function App() {
   });
 
   return (
-    <View style={styles.root} onLayout={hideSplash}>
+    <SafeAreaProvider>
+      <View style={styles.root} onLayout={hideSplash}>
       <StatusBar style="light" />
       <Sidebar />
       <Animated.View style={[styles.main, { transform: [{ translateX }] }]}>
@@ -92,6 +94,7 @@ export default function App() {
         <TabBar />
       </Animated.View>
     </View>
+    </SafeAreaProvider>
   );
 }
 
