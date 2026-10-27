@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "muse-like-app",
+    "name": "Tes Ikon",
     "slug": "muse-like-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,7 +16,7 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.farid.muselike"
+      "package": "com.farid.muselike.test"
     },
     "web": {
       "favicon": "./assets/favicon.png"
