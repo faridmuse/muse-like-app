@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Font from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { Animated, Easing, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Sidebar, { SIDEBAR_WIDTH } from './components/Sidebar';
@@ -33,6 +34,19 @@ export default function App() {
     const t = setTimeout(hideSplash, 3000);
     return () => clearTimeout(t);
   }, [hideSplash]);
+
+  // Load UI fonts (Optimistic, extracted from the Muse APK). If loading
+  // fails, the splash still hides via the fallbacks and text falls back
+  // to the system font — a missing font must never block the app.
+  const [fontsLoaded, fontError] = Font.useFonts({
+    'OptimisticApp': require('./assets/fonts/OptimisticApp-Regular.ttf'),
+    'OptimisticApp-Medium': require('./assets/fonts/OptimisticApp-Medium.ttf'),
+    'OptimisticApp-Bold': require('./assets/fonts/OptimisticApp-Bold.ttf'),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) hideSplash();
+  }, [fontsLoaded, fontError, hideSplash]);
 
   // Push animation, done properly: the whole main page TRANSLATES right by
   // the sidebar width, keeping its full width — it does NOT shrink. This
@@ -95,5 +109,5 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     maxWidth: '85%',
   },
-  bubbleText: { color: '#fff', fontSize: 16 },
+  bubbleText: { color: '#fff', fontSize: 16, fontFamily: 'OptimisticApp' },
 });

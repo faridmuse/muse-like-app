@@ -43,6 +43,20 @@ jobs:
           cp "$BUNDLE" android/app/src/main/assets/index.android.bundle
           ls -lh android/app/src/main/assets/index.android.bundle
 
+      - name: Copy generated assets (fonts/icons) into debug assets
+        run: |
+          GEN=$(find android/app/build/generated/assets -maxdepth 1 -type d -name "createBundle*" | head -1)
+          if [ -n "$GEN" ]; then
+            echo "Generated assets dir: $GEN"
+            find "$GEN" -type f | head -50
+            cp -r "$GEN"/. android/app/src/main/assets/
+            echo "Copied generated assets into debug assets"
+          else
+            echo "WARNING: no generated assets dir found — fonts/icons may be missing from debug APK"
+            find android/app/build -name "*.ttf" -type f | head -20
+          fi
+          find android/app/src/main/assets -type f | head -50
+
       - name: Build debug APK
         run: cd android && ./gradlew assembleDebug --no-daemon
 
@@ -50,6 +64,10 @@ jobs:
         run: |
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/" || true
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/index.android.bundle" || (echo "ERROR: index.android.bundle NOT in APK — refusing to publish a bundle-less APK" && exit 1)
+
+      - name: List fonts in APK (diagnostic, non-failing)
+        run: |
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep -iE "\.ttf|fonts/" || echo "NO_TTF_IN_APK"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

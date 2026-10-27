@@ -62,10 +62,10 @@ const styles = StyleSheet.create({
   menu: { backgroundColor: '#1c1c1c', borderRadius: 16, paddingVertical: 8, marginBottom: 8 },
   menuRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 16 },
   menuIcon: { marginRight: 12 },
-  menuLabel: { color: '#fff', fontSize: 16 },
+  menuLabel: { color: '#fff', fontSize: 16, fontFamily: 'OptimisticApp' },
   bar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#262626', borderRadius: 28, paddingLeft: 6, paddingRight: 6, paddingVertical: 6 },
   plusButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#3a3a3a', alignItems: 'center', justifyContent: 'center' },
-  input: { flex: 1, color: '#fff', fontSize: 16, paddingHorizontal: 8, maxHeight: 120 },
+  input: { flex: 1, color: '#fff', fontSize: 16, fontFamily: 'OptimisticApp', paddingHorizontal: 8, maxHeight: 120 },
   micButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#3a3a3a', alignItems: 'center', justifyContent: 'center' },
   sendButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#007AFF', alignItems: 'center', justifyContent: 'center' },
 });

@@ -27,9 +27,9 @@ const styles = StyleSheet.create({
   sideButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#262626', alignItems: 'center', justifyContent: 'center' },
   center: { alignItems: 'center' },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#f9a8d4', alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#000', fontSize: 18, fontWeight: 'bold' },
+  avatarText: { color: '#000', fontSize: 18, fontFamily: 'OptimisticApp-Bold' },
   namePill: { backgroundColor: '#262626', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3, marginTop: -12 },
-  name: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
+  name: { color: '#fff', fontSize: 14, fontFamily: 'OptimisticApp-Bold' },
   inviteButton: { backgroundColor: '#262626', borderRadius: 20, paddingHorizontal: 16, height: 40, alignItems: 'center', justifyContent: 'center' },
-  inviteText: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  inviteText: { color: '#fff', fontSize: 15, fontFamily: 'OptimisticApp-Medium' },
 });
