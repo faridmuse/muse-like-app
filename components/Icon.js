@@ -36,6 +36,8 @@ const GLYPHS = {
   file: 61801,
   plus: 61888,
   'arrow-up': 61716,
+  'arrow-down': 61708,
+  'corner-up-left': 61774,
   mic: 61855,
 };
 

@@ -3,13 +3,20 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { Animated, Easing, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { KeyboardProvider, useKeyboardHandler, useKeyboardState } from 'react-native-keyboard-controller';
+import { Animated, Easing, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardProvider, useKeyboardHandler } from 'react-native-keyboard-controller';
 import Reanimated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import Sidebar, { SIDEBAR_WIDTH } from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
 import Composer from './components/Composer';
 import TabBar from './components/TabBar';
+import ChatBubble from './components/ChatBubble';
+import ReplyMessage from './components/ReplyMessage';
+import TypingIndicator from './components/TypingIndicator';
+import ScrollToBottomButton from './components/ScrollToBottomButton';
+import TopFade from './components/TopFade';
+import { getGroupFlags } from './components/messageGrouping';
+import { PLACEHOLDER_MESSAGES } from './components/placeholderChat';
 
 // Keep the native splash up until JS explicitly hides it, so a slow first
 // frame can never leave the splash on screen forever. The timeout below is
@@ -21,21 +28,30 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function Main() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(PLACEHOLDER_MESSAGES);
+  const [replyTo, setReplyTo] = useState(null);
+  const [showScrollButton, setShowScrollButton] = useState(true);
+  const scrollRef = useRef(null);
   const splashHidden = useRef(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
 
   // Keyboard mimic (Muse behavior): composer moves up with the keyboard,
-  // TabBar is not visible while the keyboard is open, back when it closes.
-  // Muse mechanism (proven from its APK): composer is bottom-of-maxHeight,
-  // parent reduces maxHeight by keyboard height, composer rises with it.
-  // RN equivalent: react-native-keyboard-controller reads the native IME
-  // inset directly (not window resize, not RN layout events), so it works
-  // under edge-to-edge + adjustNothing where adjustResize and RN events
-  // both fail. Animated paddingBottom (UI thread, frame-by-frame) lifts
-  // the composer; JS height state hides the TabBar while open.
+  // TabBar is covered by the keyboard while typing, back when it closes.
+  // Muse mechanism (proven from its APK + observed close behavior): the
+  // bottom bar is always mounted, never hidden by code — the keyboard
+  // (system window) simply covers it while open and uncovers it as it
+  // slides down. The composer stops at the TabBar top, never goes to
+  // the screen bottom, so it never feels pushed up. NOT a grace period:
+  // delaying the TabBar show would still let the input hit the bottom
+  // first, then jump up — just later. Fix: keep TabBar always mounted
+  // below the top part, and pad the top part by max(0, K - T) only.
+  // While K >= T, padding = K - T, composer sits at the keyboard top.
+  // Once K drops below T, padding = 0, composer stays at the TabBar top
+  // while the keyboard slides down and uncovers the TabBar from above.
+  // T is measured once via onLayout (it varies with the nav bar inset),
+  // never guessed, and never changes during a keyboard animation.
   const keyboardHeight = useSharedValue(0);
-  const keyboardStateHeight = useKeyboardState((state) => state.height);
+  const tabBarHeight = useSharedValue(0);
 
   useKeyboardHandler(
     {
@@ -47,8 +63,8 @@ function Main() {
     [],
   );
 
-  const animatedKeyboardStyle = useAnimatedStyle(() => ({
-    paddingBottom: keyboardHeight.value,
+  const animatedTopStyle = useAnimatedStyle(() => ({
+    paddingBottom: Math.max(0, keyboardHeight.value - tabBarHeight.value),
   }));
 
   const hideSplash = useCallback(async () => {
@@ -93,10 +109,25 @@ function Main() {
     }).start();
   }, [sidebarOpen, slideAnim]);
 
+  const handleScroll = (e) => {
+    const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+    const distance = contentSize.height - (layoutMeasurement.height + contentOffset.y);
+    setShowScrollButton(distance > 80);
+  };
+
+  const handleReply = (target) => {
+    setReplyTo(target);
+  };
+
   const handleSend = (text) => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    setMessages((prev) => [...prev, { id: String(Date.now()), text: trimmed }]);
+    setMessages((prev) => [
+      ...prev,
+      { id: String(Date.now()), role: 'user', text: trimmed, ...(replyTo ? { replyTo } : {}) },
+    ]);
+    setReplyTo(null);
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
   const translateX = slideAnim.interpolate({
@@ -104,24 +135,47 @@ function Main() {
     outputRange: [0, SIDEBAR_WIDTH],
   });
 
+  const renderMessage = (m, index, list) => {
+    if (m.replyTo) {
+      return <ReplyMessage key={m.id} message={m} onReply={handleReply} />;
+    }
+    const { isFirst, isLast } = getGroupFlags(list, index);
+    return (
+      <View key={m.id} style={{ marginBottom: isLast ? 12 : 4 }}>
+        <ChatBubble role={m.role} text={m.text} isFirst={isFirst} isLast={isLast} onReply={handleReply} />
+      </View>
+    );
+  };
+
   return (
     <SafeAreaProvider>
       <View style={styles.root} onLayout={hideSplash}>
       <StatusBar style="light" />
       <Sidebar />
       <Animated.View style={[styles.main, { transform: [{ translateX }] }]}>
-        <Reanimated.View style={[styles.keyboardContainer, animatedKeyboardStyle]}>
-          <ChatHeader onMenuPress={() => setSidebarOpen((v) => !v)} />
-          <ScrollView style={styles.messages} contentContainerStyle={styles.messagesContent}>
-            {messages.map((m) => (
-              <View key={m.id} style={styles.bubble}>
-                <Text style={styles.bubbleText}>{m.text}</Text>
-              </View>
-            ))}
-          </ScrollView>
-          <Composer onSend={handleSend} />
-          {keyboardStateHeight <= 0 && <TabBar />}
+        <Reanimated.View style={[styles.topPart, animatedTopStyle]}>
+          <ChatHeader onMenuPress={() => setSidebarOpen((v) => !v)} status="Installing preview build" />
+          <View style={styles.messagesWrap}>
+            <ScrollView
+              ref={scrollRef}
+              style={styles.messages}
+              contentContainerStyle={styles.messagesContent}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}>
+              {messages.map((m, i, list) => renderMessage(m, i, list))}
+              <TypingIndicator />
+            </ScrollView>
+            <ScrollToBottomButton
+              visible={showScrollButton}
+              onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}
+            />
+            <TopFade />
+          </View>
+          <Composer onSend={handleSend} replyTo={replyTo} onCancelReply={() => setReplyTo(null)} />
         </Reanimated.View>
+        <View onLayout={(e) => { tabBarHeight.value = e.nativeEvent.layout.height; }}>
+          <TabBar />
+        </View>
       </Animated.View>
     </View>
     </SafeAreaProvider>
@@ -139,17 +193,8 @@ export default function App() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#000' },
   main: { flex: 1, backgroundColor: '#000', zIndex: 1 },
-  keyboardContainer: { flex: 1 },
+  topPart: { flex: 1 },
+  messagesWrap: { flex: 1 },
   messages: { flex: 1 },
   messagesContent: { padding: 16, paddingBottom: 8 },
-  bubble: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#262626',
-    borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 8,
-    maxWidth: '85%',
-  },
-  bubbleText: { color: '#fff', fontSize: 16, fontFamily: 'OptimisticApp' },
 });

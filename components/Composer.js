@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from './Icon';
+import ComposerReplyPreview from './ComposerReplyPreview';
 
 const ATTACH_OPTIONS = [
   { icon: 'camera', label: 'Kamera' },
@@ -8,7 +9,7 @@ const ATTACH_OPTIONS = [
   { icon: 'file', label: 'File' },
 ];
 
-export default function Composer({ onSend }) {
+export default function Composer({ onSend, replyTo, onCancelReply }) {
   const [text, setText] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const hasText = text.trim().length > 0;
@@ -31,6 +32,7 @@ export default function Composer({ onSend }) {
           ))}
         </View>
       )}
+      <ComposerReplyPreview replyTo={replyTo} onCancel={onCancelReply} />
       <View style={styles.bar}>
         <TouchableOpacity activeOpacity={0.7} style={styles.plusButton} onPress={() => setMenuOpen((v) => !v)}>
           <Icon name="plus" size={24} color="#fff" />
