@@ -1,8 +1,7 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Dimensions, Easing, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-const SIDEBAR_WIDTH = Math.round(Dimensions.get('window').width * 0.78);
+export const SIDEBAR_WIDTH = Math.round(Dimensions.get('window').width * 0.78);
 
 const TABS = [
   { icon: 'message-circle', label: 'Obrolan utama', active: true },
@@ -12,25 +11,12 @@ const TABS = [
   { icon: 'grid', label: 'Perpustakaan', active: false },
 ];
 
-export default function Sidebar({ open }) {
-  const widthAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(widthAnim, {
-      toValue: open ? 1 : 0,
-      duration: 280,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: false,
-    }).start();
-  }, [open, widthAnim]);
-
-  const width = widthAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, SIDEBAR_WIDTH],
-  });
-
+// Static panel: the slide motion is driven by App (main translates over
+// this panel). This sidebar no longer animates its own width — the old
+// width-interpolation is what squeezed main and shortened the input.
+export default function Sidebar() {
   return (
-    <Animated.View style={[styles.sidebar, { width }]}>
+    <View style={styles.sidebar}>
       <View style={styles.inner}>
         <Text style={styles.title}>Ai-Chan</Text>
         <Text style={styles.sectionTitle}>TAB</Text>
@@ -60,12 +46,21 @@ export default function Sidebar({ open }) {
           </TouchableOpacity>
         </View>
       </View>
-    </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  sidebar: { backgroundColor: '#000', overflow: 'hidden' },
+  sidebar: {
+    backgroundColor: '#000',
+    overflow: 'hidden',
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: SIDEBAR_WIDTH,
+    zIndex: 0,
+  },
   inner: { width: SIDEBAR_WIDTH, flex: 1, paddingHorizontal: 16, paddingTop: 56, paddingBottom: 24 },
   title: { color: '#fff', fontSize: 28, fontWeight: 'bold', marginBottom: 24 },
   sectionTitle: { color: '#888', fontSize: 13, fontWeight: 'bold', letterSpacing: 1 },
