@@ -30,8 +30,7 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 200
         }
-      ],
-      "./plugins/with-disable-edge-to-edge"
+      ]
     ],
     "extra": {
       "eas": {
