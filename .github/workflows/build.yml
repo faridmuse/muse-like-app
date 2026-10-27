@@ -29,20 +29,24 @@ jobs:
       - name: Generate native Android project
         run: npx expo prebuild --platform android --non-interactive
 
-      - name: Bundle JS explicitly (preview-1 shipped without it)
-        run: cd android && ./gradlew bundleDebugJsAndAssets --no-daemon
+      - name: List bundle tasks (diagnostic, never fails)
+        run: cd android && ./gradlew tasks --all 2>&1 | grep -i -E "bundle|hermes" || echo "NO_BUNDLE_OR_HERMES_TASKS_FOUND"
 
-      - name: Verify JS bundle exists (fail loudly, never ship bundle-less)
+      - name: Check hermesc availability (diagnostic, never fails)
+        run: ls node_modules/react-native/sdks/hermesc/ 2>&1 || echo "NO_HERMESC_DIR"
+
+      - name: Bundle JS via CLI (Gradle has no bundle task in this project)
         run: |
-          BUNDLE=$(find android/app/build -name "index.android.bundle" -type f | head -1)
-          if [ -z "$BUNDLE" ]; then
-            echo "ERROR: index.android.bundle not found under android/app/build — refusing to package a bundle-less APK"
-            exit 1
-          fi
-          ls -lh "$BUNDLE"
+          mkdir -p android/app/src/main/assets android/app/src/main/res
+          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
 
       - name: Build debug APK
         run: cd android && ./gradlew assembleDebug --no-daemon
+
+      - name: Verify APK contains bundle (fail loudly, never ship bundle-less)
+        run: |
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/" || true
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/index.android.bundle" || (echo "ERROR: index.android.bundle NOT in APK — refusing to publish a bundle-less APK" && exit 1)
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
