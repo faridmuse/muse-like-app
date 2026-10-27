@@ -25,8 +25,8 @@ const styles = StyleSheet.create({
   sideButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#262626', alignItems: 'center', justifyContent: 'center' },
   sideSpacer: { width: 44 },
   center: { flex: 1, alignItems: 'center' },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#f9a8d4', alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: '#000', fontSize: 18, fontFamily: 'OptimisticApp-Bold' },
+  avatar: { width: 68, height: 68, borderRadius: 34, backgroundColor: '#f9a8d4', alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#000', fontSize: 28, fontFamily: 'OptimisticApp-Bold' },
   namePill: { backgroundColor: '#262626', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3, marginTop: -12 },
   name: { color: '#fff', fontSize: 14, fontFamily: 'OptimisticApp-Bold' },
 });
