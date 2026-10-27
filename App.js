@@ -46,9 +46,17 @@ export default function App() {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setKeyboardHeight(0);
     });
+    // DidChangeFrame tracks height changes after first show: toolbar or
+    // suggestions can grow the keyboard after DidShow, which left the
+    // composer peeking instead of fully above the keyboard.
+    const changeSub = Keyboard.addListener('keyboardDidChangeFrame', (e) => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setKeyboardHeight(e.endCoordinates.height);
+    });
     return () => {
       showSub.remove();
       hideSub.remove();
+      changeSub.remove();
     };
   }, []);
 

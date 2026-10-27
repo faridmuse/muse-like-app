@@ -1,4 +1,5 @@
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from './Icon';
 
 export const SIDEBAR_WIDTH = Math.round(Dimensions.get('window').width * 0.78);
@@ -15,9 +16,10 @@ const TABS = [
 // this panel). This sidebar no longer animates its own width — the old
 // width-interpolation is what squeezed main and shortened the input.
 export default function Sidebar() {
+  const insets = useSafeAreaInsets();
   return (
     <View style={styles.sidebar}>
-      <View style={styles.inner}>
+      <View style={[styles.inner, { paddingBottom: 24 + insets.bottom }]}>
         <Text style={styles.title}>Ai-Chan</Text>
         <Text style={styles.sectionTitle}>TAB</Text>
         <Text style={styles.hint}>Anda bisa mengurutkan ulang dengan menekan lama</Text>
