@@ -6,10 +6,17 @@ import { Text } from 'react-native';
 // no res/raw or res/font, so the native asset lookup fails, and the
 // failure is swallowed (no catch, no retry) — the component then renders
 // an empty Text forever. React Native's own font fallback resolves this
-// family straight from assets/fonts/<family>.ttf, which the build does
-// ship (Metro flattens the node_modules asset path into the filename).
-const FEATHER_FAMILY =
-  'node_modules_expo_vectoricons_build_vendor_reactnativevectoricons_fonts_feather';
+// family straight from assets/fonts/<family>.ttf, which the build ships
+// when the file is required below (preview-14 proved the point by
+// omission: with no require left, Metro dropped the feather file from
+// the APK entirely and only 3 .ttf remained).
+const FEATHER_FAMILY = 'assets_fonts_feather';
+
+// Bare require on purpose: it forces Metro to include the project-local
+// Feather file in the APK as assets/fonts/assets_fonts_feather.ttf (the
+// flattened project-asset name, as preview-13 already demonstrated).
+// The value is never used — the family name above is what renders it.
+require('../assets/fonts/Feather.ttf');
 
 // Codepoints from @expo/vector-icons' Feather glyph map. Feather has no
 // lightbulb glyph, so the Ide tab uses zap as its stand-in.
