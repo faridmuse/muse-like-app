@@ -3,7 +3,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { Animated, Easing, Keyboard, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardProvider, useKeyboardHandler, useKeyboardState } from 'react-native-keyboard-controller';
+import Reanimated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import Sidebar, { SIDEBAR_WIDTH } from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
 import Composer from './components/Composer';
@@ -17,7 +19,7 @@ import TabBar from './components/TabBar';
 // a bundle-less APK.)
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-export default function App() {
+function Main() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const splashHidden = useRef(false);
@@ -25,29 +27,29 @@ export default function App() {
 
   // Keyboard mimic (Muse behavior): composer moves up with the keyboard,
   // TabBar is not visible while the keyboard is open, back when it closes.
-  // Proven cause (ReactRootView.java): RN keyboard events fire ONLY on
-  // global layout. With adjustNothing the window never resizes, so ime
-  // growth (toolbar) never triggers a layout, height updates never fire,
-  // and JS padding stays short (composer peeking). Fix: adjustResize
-  // (app.json) lets the window itself shrink to the real ime height, so
-  // the composer sits fully above the keyboard with no JS height math.
-  // JS only tracks visible/hidden (boolean, reliable under adjustResize
-  // because window resize always triggers layout) to hide the TabBar
-  // while the keyboard is open, matching Muse's covered TabBar visually.
-  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  // Muse mechanism (proven from its APK): composer is bottom-of-maxHeight,
+  // parent reduces maxHeight by keyboard height, composer rises with it.
+  // RN equivalent: react-native-keyboard-controller reads the native IME
+  // inset directly (not window resize, not RN layout events), so it works
+  // under edge-to-edge + adjustNothing where adjustResize and RN events
+  // both fail. Animated paddingBottom (UI thread, frame-by-frame) lifts
+  // the composer; JS height state hides the TabBar while open.
+  const keyboardHeight = useSharedValue(0);
+  const keyboardStateHeight = useKeyboardState((state) => state.height);
 
-  useEffect(() => {
-    const showSub = Keyboard.addListener('keyboardDidShow', () => {
-      setKeyboardVisible(true);
-    });
-    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboardVisible(false);
-    });
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
+  useKeyboardHandler(
+    {
+      onMove: (e) => {
+        'worklet';
+        keyboardHeight.value = Math.max(e.height, 0);
+      },
+    },
+    [],
+  );
+
+  const animatedKeyboardStyle = useAnimatedStyle(() => ({
+    paddingBottom: keyboardHeight.value,
+  }));
 
   const hideSplash = useCallback(async () => {
     if (splashHidden.current) return;
@@ -108,25 +110,36 @@ export default function App() {
       <StatusBar style="light" />
       <Sidebar />
       <Animated.View style={[styles.main, { transform: [{ translateX }] }]}>
-        <ChatHeader onMenuPress={() => setSidebarOpen((v) => !v)} />
-        <ScrollView style={styles.messages} contentContainerStyle={styles.messagesContent}>
-          {messages.map((m) => (
-            <View key={m.id} style={styles.bubble}>
-              <Text style={styles.bubbleText}>{m.text}</Text>
-            </View>
-          ))}
-        </ScrollView>
-        <Composer onSend={handleSend} />
-        {!isKeyboardVisible && <TabBar />}
+        <Reanimated.View style={[styles.keyboardContainer, animatedKeyboardStyle]}>
+          <ChatHeader onMenuPress={() => setSidebarOpen((v) => !v)} />
+          <ScrollView style={styles.messages} contentContainerStyle={styles.messagesContent}>
+            {messages.map((m) => (
+              <View key={m.id} style={styles.bubble}>
+                <Text style={styles.bubbleText}>{m.text}</Text>
+              </View>
+            ))}
+          </ScrollView>
+          <Composer onSend={handleSend} />
+          {keyboardStateHeight <= 0 && <TabBar />}
+        </Reanimated.View>
       </Animated.View>
     </View>
     </SafeAreaProvider>
   );
 }
 
+export default function App() {
+  return (
+    <KeyboardProvider preload={false}>
+      <Main />
+    </KeyboardProvider>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#000' },
   main: { flex: 1, backgroundColor: '#000', zIndex: 1 },
+  keyboardContainer: { flex: 1 },
   messages: { flex: 1 },
   messagesContent: { padding: 16, paddingBottom: 8 },
   bubble: {

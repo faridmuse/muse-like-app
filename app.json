@@ -18,13 +18,14 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "package": "com.farid.muselike",
-      "windowSoftInputMode": "adjustResize"
+      "windowSoftInputMode": "adjustNothing"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-font",
+      "./plugins/with-adjust-nothing",
       [
         "expo-splash-screen",
         {
