@@ -43,11 +43,11 @@ export default function App() {
     'OptimisticApp': require('./assets/fonts/OptimisticApp-Regular.ttf'),
     'OptimisticApp-Medium': require('./assets/fonts/OptimisticApp-Medium.ttf'),
     'OptimisticApp-Bold': require('./assets/fonts/OptimisticApp-Bold.ttf'),
-    // Feather icons render blank in this standalone build unless preloaded:
-    // createIconSet only loads the font on mount, and that path evidently
-    // fails here even though Feather.ttf ships in the APK. Feather.font is
-    // the set's own map ({ feather: asset }), verified in v15.1.1 source.
-    ...Feather.font,
+    // PREPARED FIX (LOCAL ONLY, NOT PUSHED — push only if Farid reports
+    // preview-10 still icon-less; discard if preview-10 icons show):
+    // project-local require, same pattern as the working Optimistic fonts,
+    // instead of the node_modules asset via Feather.font.
+    'feather': require('./assets/fonts/Feather.ttf'),
   });
 
   useEffect(() => {
