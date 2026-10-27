@@ -1,12 +1,12 @@
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import Icon from './Icon';
 
 export const SIDEBAR_WIDTH = Math.round(Dimensions.get('window').width * 0.78);
 
 const TABS = [
   { icon: 'message-circle', label: 'Obrolan utama', active: true },
   { icon: 'file-text', label: 'Kabar', active: false },
-  { icon: 'lightbulb', label: 'Ide', active: false },
+  { icon: 'zap', label: 'Ide', active: false },
   { icon: 'check-square', label: 'Sasaran', active: false },
   { icon: 'grid', label: 'Perpustakaan', active: false },
 ];
@@ -23,26 +23,26 @@ export default function Sidebar() {
         <Text style={styles.hint}>Anda bisa mengurutkan ulang dengan menekan lama</Text>
         {TABS.map((tab) => (
           <TouchableOpacity key={tab.label} activeOpacity={0.7} style={[styles.tabRow, tab.active && styles.tabRowActive]}>
-            <Feather name={tab.icon} size={20} color={tab.active ? '#fff' : '#aaa'} style={styles.tabIcon} />
+            <Icon name={tab.icon} size={20} color={tab.active ? '#fff' : '#aaa'} style={styles.tabIcon} />
             <Text style={[styles.tabLabel, tab.active && styles.tabLabelActive]}>{tab.label}</Text>
           </TouchableOpacity>
         ))}
         <View style={styles.sideHeader}>
           <Text style={styles.sectionTitle}>OBROLAN SELINGAN</Text>
-          <Feather name="archive" size={18} color="#aaa" />
+          <Icon name="archive" size={18} color="#aaa" />
         </View>
         <Text style={styles.emptyText}>Akan muncul di sini jika Anda memulai.</Text>
         <View style={{ flex: 1 }} />
         <View style={styles.bottomBar}>
           <TouchableOpacity activeOpacity={0.7} style={styles.bottomCircle}>
-            <Feather name="settings" size={20} color="#fff" />
+            <Icon name="settings" size={20} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.7} style={styles.searchPill}>
-            <Feather name="search" size={18} color="#fff" style={styles.searchIcon} />
+            <Icon name="search" size={18} color="#fff" style={styles.searchIcon} />
             <Text style={styles.searchLabel}>Cari</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.7} style={styles.bottomCircle}>
-            <Feather name="edit" size={20} color="#fff" />
+            <Icon name="edit" size={20} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>

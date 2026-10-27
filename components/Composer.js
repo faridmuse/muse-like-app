@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import Icon from './Icon';
 
 const ATTACH_OPTIONS = [
   { icon: 'camera', label: 'Kamera' },
@@ -25,7 +25,7 @@ export default function Composer({ onSend }) {
         <View style={styles.menu}>
           {ATTACH_OPTIONS.map((opt) => (
             <TouchableOpacity key={opt.label} activeOpacity={0.7} style={styles.menuRow} onPress={() => setMenuOpen(false)}>
-              <Feather name={opt.icon} size={20} color="#fff" style={styles.menuIcon} />
+              <Icon name={opt.icon} size={20} color="#fff" style={styles.menuIcon} />
               <Text style={styles.menuLabel}>{opt.label}</Text>
             </TouchableOpacity>
           ))}
@@ -33,7 +33,7 @@ export default function Composer({ onSend }) {
       )}
       <View style={styles.bar}>
         <TouchableOpacity activeOpacity={0.7} style={styles.plusButton} onPress={() => setMenuOpen((v) => !v)}>
-          <Feather name="plus" size={24} color="#fff" />
+          <Icon name="plus" size={24} color="#fff" />
         </TouchableOpacity>
         <TextInput
           style={styles.input}
@@ -45,11 +45,11 @@ export default function Composer({ onSend }) {
         />
         {hasText ? (
           <TouchableOpacity activeOpacity={0.7} style={styles.sendButton} onPress={handleSend}>
-            <Feather name="arrow-up" size={22} color="#fff" />
+            <Icon name="arrow-up" size={22} color="#fff" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity activeOpacity={0.7} style={styles.micButton}>
-            <Feather name="mic" size={20} color="#fff" />
+            <Icon name="mic" size={20} color="#fff" />
           </TouchableOpacity>
         )}
       </View>

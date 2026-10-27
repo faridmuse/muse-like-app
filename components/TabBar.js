@@ -1,10 +1,10 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import Icon from './Icon';
 
 const TABS = [
   { icon: 'message-circle', active: true },
   { icon: 'file-text', active: false },
-  { icon: 'lightbulb', active: false },
+  { icon: 'zap', active: false },
   { icon: 'check-square', active: false },
   { icon: 'grid', active: false },
 ];
@@ -14,7 +14,7 @@ export default function TabBar() {
     <View style={styles.bar}>
       {TABS.map((tab, i) => (
         <TouchableOpacity key={i} activeOpacity={0.7} style={styles.tab}>
-          <Feather name={tab.icon} size={24} color={tab.active ? '#fff' : '#888'} />
+          <Icon name={tab.icon} size={24} color={tab.active ? '#fff' : '#888'} />
         </TouchableOpacity>
       ))}
     </View>

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
-import { Feather } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { Animated, Easing, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Sidebar, { SIDEBAR_WIDTH } from './components/Sidebar';
@@ -43,11 +42,6 @@ export default function App() {
     'OptimisticApp': require('./assets/fonts/OptimisticApp-Regular.ttf'),
     'OptimisticApp-Medium': require('./assets/fonts/OptimisticApp-Medium.ttf'),
     'OptimisticApp-Bold': require('./assets/fonts/OptimisticApp-Bold.ttf'),
-    // PREPARED FIX (LOCAL ONLY, NOT PUSHED — push only if Farid reports
-    // preview-10 still icon-less; discard if preview-10 icons show):
-    // project-local require, same pattern as the working Optimistic fonts,
-    // instead of the node_modules asset via Feather.font.
-    'feather': require('./assets/fonts/Feather.ttf'),
   });
 
   useEffect(() => {

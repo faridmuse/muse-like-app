@@ -1,11 +1,11 @@
 import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import Icon from './Icon';
 
 export default function ChatHeader({ onMenuPress }) {
   return (
     <View style={styles.header}>
       <TouchableOpacity onPress={onMenuPress} activeOpacity={0.7} style={styles.sideButton}>
-        <Feather name="menu" size={24} color="#fff" />
+        <Icon name="menu" size={24} color="#fff" />
       </TouchableOpacity>
       <View style={styles.center}>
         <View style={styles.avatar}>
