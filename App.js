@@ -81,29 +81,23 @@ export default function App() {
     outputRange: [0, SIDEBAR_WIDTH],
   });
 
-  // TEST ONLY: layar tes ikon — jalur muat font SAMA PERSIS dengan aplikasi
-  // utama (import Feather + useFonts ...Feather.font di atas tidak diubah).
-  // Yang diganti hanya apa yang dirender: lima ikon Feather besar di latar
-  // putih dengan label, tanpa layout/sidebar/tabbar, supaya tidak ada
-  // perancu warna/ukuran/layout. Dikembalikan ke UI asli setelah hasil tes.
   return (
-    <ScrollView style={testStyles.root} contentContainerStyle={testStyles.content} onLayout={hideSplash}>
-      <StatusBar style="dark" />
-      <Text style={testStyles.title}>TES IKON FEATHER</Text>
-      <Text style={testStyles.note}>Import + useFonts sama persis dengan aplikasi utama. Ikon hitam besar di latar putih.</Text>
-      {[
-        { name: 'menu', label: 'menu 61852' },
-        { name: 'archive', label: 'archive 61707' },
-        { name: 'send', label: 'send 61905' },
-        { name: 'camera', label: 'camera 61736' },
-        { name: 'plus', label: 'plus 61888' },
-      ].map((it) => (
-        <View key={it.name} style={testStyles.row}>
-          <Feather name={it.name} size={64} color="#000" />
-          <Text style={testStyles.label}>{it.label}</Text>
-        </View>
-      ))}
-    </ScrollView>
+    <View style={styles.root} onLayout={hideSplash}>
+      <StatusBar style="light" />
+      <Sidebar />
+      <Animated.View style={[styles.main, { transform: [{ translateX }] }]}>
+        <ChatHeader onMenuPress={() => setSidebarOpen((v) => !v)} />
+        <ScrollView style={styles.messages} contentContainerStyle={styles.messagesContent}>
+          {messages.map((m) => (
+            <View key={m.id} style={styles.bubble}>
+              <Text style={styles.bubbleText}>{m.text}</Text>
+            </View>
+          ))}
+        </ScrollView>
+        <Composer onSend={handleSend} />
+        <TabBar />
+      </Animated.View>
+    </View>
   );
 }
 
@@ -122,14 +116,4 @@ const styles = StyleSheet.create({
     maxWidth: '85%',
   },
   bubbleText: { color: '#fff', fontSize: 16, fontFamily: 'OptimisticApp' },
-});
-
-// TEST ONLY: gaya layar tes ikon (lihat return di atas).
-const testStyles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#fff' },
-  content: { padding: 24 },
-  title: { color: '#000', fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
-  note: { color: '#333', fontSize: 14, marginBottom: 24 },
-  row: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
-  label: { color: '#000', fontSize: 18, marginLeft: 16 },
 });
