@@ -35,14 +35,15 @@ function Main() {
   const splashHidden = useRef(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
 
-  // Sidebar swipe, same toggle as the hamburger button: when closed,
-  // a right swipe starting at the screen edge (startX < 16, left of
-  // the chat padding, so bubble drags starting at x >= 16 never
-  // trigger it) opens it; when open, a left swipe anywhere closes
-  // it. Threshold 60, same as drag-to-reply. No interactive follow:
-  // on release past threshold it toggles, and the existing 280 ms
-  // slide animation runs. Vertical drags and taps return false, so
-  // ScrollView, bubble drags, and buttons keep working.
+  // Sidebar swipe, close only, faithful to Muse: when open, a left
+  // swipe anywhere closes it, same as the hamburger button. No
+  // swipe to open: in Muse, swipe to open does not work, and in
+  // this app, when in chat, there is no swiping to sidebar either.
+  // Hamburger is the only way to open. Threshold 60, same as
+  // drag-to-reply. No interactive follow: on release past
+  // threshold it closes, and the existing 280 ms slide animation
+  // runs. Vertical drags and taps return false, so ScrollView,
+  // bubble drags, and buttons keep working.
   const sidebarOpenRef = useRef(false);
   useEffect(() => {
     sidebarOpenRef.current = sidebarOpen;
@@ -50,16 +51,12 @@ function Main() {
 
   const sidebarPanResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (evt, gesture) => {
-        const startX = evt.nativeEvent.pageX - gesture.dx;
-        if (!sidebarOpenRef.current) {
-          return startX < 16 && gesture.dx > 12 && gesture.dx > Math.abs(gesture.dy) * 1.5;
-        }
-        return gesture.dx < -12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.5;
-      },
+      onMoveShouldSetPanResponder: (evt, gesture) =>
+        sidebarOpenRef.current &&
+        gesture.dx < -12 &&
+        Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.5,
       onPanResponderRelease: (evt, gesture) => {
-        if (!sidebarOpenRef.current && gesture.dx > 60) setSidebarOpen(true);
-        else if (sidebarOpenRef.current && gesture.dx < -60) setSidebarOpen(false);
+        if (sidebarOpenRef.current && gesture.dx < -60) setSidebarOpen(false);
       },
       onPanResponderTerminate: () => {},
     }),
