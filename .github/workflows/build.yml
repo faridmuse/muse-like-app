@@ -29,16 +29,19 @@ jobs:
       - name: Generate native Android project
         run: npx expo prebuild --platform android --non-interactive
 
-      - name: List bundle tasks (diagnostic, never fails)
-        run: cd android && ./gradlew tasks --all 2>&1 | grep -i -E "bundle|hermes" || echo "NO_BUNDLE_OR_HERMES_TASKS_FOUND"
+      - name: Generate JS bundle via release task (debug has no bundle task)
+        run: cd android && ./gradlew :app:createBundleReleaseJsAndAssets --no-daemon
 
-      - name: Check hermesc availability (diagnostic, never fails)
-        run: ls node_modules/react-native/sdks/hermesc/ 2>&1 || echo "NO_HERMESC_DIR"
-
-      - name: Bundle JS via CLI (Gradle has no bundle task in this project)
+      - name: Copy bundle into debug assets (fail loudly if not generated)
         run: |
-          mkdir -p android/app/src/main/assets android/app/src/main/res
-          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+          BUNDLE=$(find android/app/build -name "index.android.bundle" -type f | head -1)
+          if [ -z "$BUNDLE" ]; then
+            echo "ERROR: index.android.bundle not found after release bundle task — refusing to assemble bundle-less"
+            exit 1
+          fi
+          mkdir -p android/app/src/main/assets
+          cp "$BUNDLE" android/app/src/main/assets/index.android.bundle
+          ls -lh android/app/src/main/assets/index.android.bundle
 
       - name: Build debug APK
         run: cd android && ./gradlew assembleDebug --no-daemon
