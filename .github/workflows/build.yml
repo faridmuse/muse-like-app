@@ -29,6 +29,18 @@ jobs:
       - name: Generate native Android project
         run: npx expo prebuild --platform android --non-interactive
 
+      - name: Bundle JS explicitly (preview-1 shipped without it)
+        run: cd android && ./gradlew bundleDebugJsAndAssets --no-daemon
+
+      - name: Verify JS bundle exists (fail loudly, never ship bundle-less)
+        run: |
+          BUNDLE=$(find android/app/build -name "index.android.bundle" -type f | head -1)
+          if [ -z "$BUNDLE" ]; then
+            echo "ERROR: index.android.bundle not found under android/app/build — refusing to package a bundle-less APK"
+            exit 1
+          fi
+          ls -lh "$BUNDLE"
+
       - name: Build debug APK
         run: cd android && ./gradlew assembleDebug --no-daemon
 
