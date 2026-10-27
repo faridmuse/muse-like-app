@@ -45,17 +45,22 @@ jobs:
 
       - name: Copy generated assets (fonts/icons) into debug assets
         run: |
-          GEN=$(find android/app/build/generated/assets -maxdepth 1 -type d -name "createBundle*" | head -1)
+          GEN=$(find android/app/build/generated/assets -maxdepth 1 -type d -name "createBundle*" 2>/dev/null | head -1)
           if [ -n "$GEN" ]; then
             echo "Generated assets dir: $GEN"
             find "$GEN" -type f | head -50
             cp -r "$GEN"/. android/app/src/main/assets/
-            echo "Copied generated assets into debug assets"
+            echo "Copied generated assets tree into debug assets"
           else
-            echo "WARNING: no generated assets dir found — fonts/icons may be missing from debug APK"
-            find android/app/build -name "*.ttf" -type f | head -20
+            echo "WARNING: no generated assets dir found under android/app/build/generated/assets"
           fi
-          find android/app/src/main/assets -type f | head -50
+          echo "All .ttf files under android/app/build:"
+          find android/app/build -name "*.ttf" -type f 2>/dev/null | head -50
+          echo "Copying every .ttf found under android/app/build into debug assets/fonts (flattened, in addition to the tree copy above):"
+          mkdir -p android/app/src/main/assets/fonts
+          find android/app/build -name "*.ttf" -type f 2>/dev/null -exec cp -n {} android/app/src/main/assets/fonts/ \; || true
+          echo "Debug assets now contain:"
+          find android/app/src/main/assets -type f | head -80
 
       - name: Build debug APK
         run: cd android && ./gradlew assembleDebug --no-daemon
@@ -65,9 +70,9 @@ jobs:
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep "assets/" || true
           unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/index.android.bundle" || (echo "ERROR: index.android.bundle NOT in APK — refusing to publish a bundle-less APK" && exit 1)
 
-      - name: List fonts in APK (diagnostic, non-failing)
+      - name: Verify APK contains fonts (fail loudly, never ship font-less)
         run: |
-          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep -iE "\.ttf|fonts/" || echo "NO_TTF_IN_APK"
+          unzip -l android/app/build/outputs/apk/debug/app-debug.apk | grep -iE "\.ttf" || (echo "ERROR: no .ttf in APK — fonts did not make it into the debug APK, refusing to publish" && exit 1)
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
