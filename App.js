@@ -29,7 +29,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 function Main() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [screen, setScreen] = useState('chat');
-  const [chatHeaderHeight, setChatHeaderHeight] = useState(176);
+  const [chatHeaderHeight, setChatHeaderHeight] = useState(148);
   const [messages, setMessages] = useState(PLACEHOLDER_MESSAGES);
   const [replyTo, setReplyTo] = useState(null);
   const [showScrollButton, setShowScrollButton] = useState(true);
