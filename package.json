@@ -15,7 +15,8 @@
     "react-native-keyboard-controller": "1.22.7",
     "react-native-markdown-display": "^7.0.2",
     "react-native-reanimated": "4.7.1",
-    "react-native-safe-area-context": "~5.10.1"
+    "react-native-safe-area-context": "~5.10.1",
+    "zustand": "^5.0.16"
   },
   "scripts": {
     "start": "expo start",

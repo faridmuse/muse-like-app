@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import HeaderButton from './HeaderButton';
-import Icon from './Icon';
+import HeaderButton from '../components/HeaderButton';
+import Icon from '../components/Icon';
+import { useRouter } from '../navigation/router';
 
 // Settings page, matching the Muse Pengaturan screenshot: grouped
 // boxes, each row an icon, a label, and a chevron-right, with divider
@@ -36,7 +37,9 @@ const BASE_GROUPS = [
 // copies with real rows when the real Settings sections are known.
 const GROUPS = [...BASE_GROUPS, BASE_GROUPS[0], BASE_GROUPS[1], BASE_GROUPS[0]];
 
-export default function SettingsPage({ onBackPress }) {
+export default function SettingsScreen() {
+  const { goBack } = useRouter();
+  const onBackPress = goBack;
   const [headerHeight, setHeaderHeight] = useState(148);
   return (
     <View style={styles.root}>
