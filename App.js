@@ -14,7 +14,7 @@ import ChatBubble from './components/ChatBubble';
 import ReplyMessage from './components/ReplyMessage';
 import TypingIndicator from './components/TypingIndicator';
 import ScrollToBottomButton from './components/ScrollToBottomButton';
-import TopFade from './components/TopFade';
+import SettingsPage from './components/SettingsPage';
 import { getGroupFlags } from './components/messageGrouping';
 import { PLACEHOLDER_MESSAGES } from './components/placeholderChat';
 
@@ -28,6 +28,8 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function Main() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [screen, setScreen] = useState('chat');
+  const [chatHeaderHeight, setChatHeaderHeight] = useState(176);
   const [messages, setMessages] = useState(PLACEHOLDER_MESSAGES);
   const [replyTo, setReplyTo] = useState(null);
   const [showScrollButton, setShowScrollButton] = useState(true);
@@ -174,19 +176,29 @@ function Main() {
     );
   };
 
+  if (screen === 'settings') {
+    return (
+      <SafeAreaProvider>
+        <View style={styles.root} onLayout={hideSplash}>
+          <StatusBar style="light" />
+          <SettingsPage onBackPress={() => setScreen('chat')} />
+        </View>
+      </SafeAreaProvider>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <View style={styles.root} onLayout={hideSplash} {...sidebarPanResponder.panHandlers}>
       <StatusBar style="light" />
-      <Sidebar />
+      <Sidebar onSettingsPress={() => { setSidebarOpen(false); setScreen('settings'); }} />
       <Animated.View style={[styles.main, { transform: [{ translateX }] }]}>
         <Reanimated.View style={[styles.topPart, animatedTopStyle]}>
-          <ChatHeader onMenuPress={() => setSidebarOpen((v) => !v)} status="Installing preview build" />
           <View style={styles.messagesWrap}>
             <ScrollView
               ref={scrollRef}
               style={styles.messages}
-              contentContainerStyle={styles.messagesContent}
+              contentContainerStyle={[styles.messagesContent, { paddingTop: chatHeaderHeight }]}
               onScroll={handleScroll}
               scrollEventThrottle={16}>
               {messages.map((m, i, list) => renderMessage(m, i, list))}
@@ -196,13 +208,17 @@ function Main() {
               visible={showScrollButton}
               onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}
             />
-            <TopFade />
           </View>
           <Composer onSend={handleSend} replyTo={replyTo} onCancelReply={() => setReplyTo(null)} />
         </Reanimated.View>
         <View onLayout={(e) => { tabBarHeight.value = e.nativeEvent.layout.height; }}>
           <TabBar />
         </View>
+        <ChatHeader
+          onMenuPress={() => setSidebarOpen((v) => !v)}
+          status="Installing preview build"
+          onLayout={(e) => setChatHeaderHeight(e.nativeEvent.layout.height)}
+        />
       </Animated.View>
     </View>
     </SafeAreaProvider>

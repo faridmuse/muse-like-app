@@ -39,6 +39,16 @@ const GLYPHS = {
   'arrow-down': 61708,
   'corner-up-left': 61774,
   mic: 61855,
+  'chevron-left': 61743,
+  'chevron-right': 61744,
+  'credit-card': 61777,
+  shield: 61910,
+  'user-check': 61958,
+  smartphone: 61921,
+  bell: 61726,
+  'pen-tool': 61876,
+  lock: 61843,
+  phone: 61878,
 };
 
 export default function Icon({ name, size = 24, color = '#fff', style }) {

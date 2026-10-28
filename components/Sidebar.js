@@ -15,7 +15,7 @@ const TABS = [
 // Static panel: the slide motion is driven by App (main translates over
 // this panel). This sidebar no longer animates its own width — the old
 // width-interpolation is what squeezed main and shortened the input.
-export default function Sidebar() {
+export default function Sidebar({ onSettingsPress }) {
   const insets = useSafeAreaInsets();
   return (
     <View style={styles.sidebar}>
@@ -36,7 +36,7 @@ export default function Sidebar() {
         <Text style={styles.emptyText}>Akan muncul di sini jika Anda memulai.</Text>
         <View style={{ flex: 1 }} />
         <View style={styles.bottomBar}>
-          <TouchableOpacity activeOpacity={0.7} style={styles.bottomCircle}>
+          <TouchableOpacity activeOpacity={0.7} style={styles.bottomCircle} onPress={onSettingsPress}>
             <Icon name="settings" size={20} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.7} style={styles.searchPill}>
